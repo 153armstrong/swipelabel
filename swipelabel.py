@@ -9,11 +9,13 @@ app = Flask(__name__)
 PATH = "images/"
 LOGFILE = "logfile.log"
 
+
 # Load image list
 raw_images = os.listdir(PATH)
 images = []
 proc_images = []
 next_image = 0
+
 
 ## read logfile, filter out already-processed images
 if os.path.isfile(LOGFILE):
@@ -24,7 +26,7 @@ if os.path.isfile(LOGFILE):
       else: images.append(PATH + raw)
 
 # Open logfile in append mode
-logfile = open(LOGFILE, "a", 0)
+logfile = open(LOGFILE, "a")
 
 # Custom static data
 @app.route('/images/<path:filename>')
@@ -34,23 +36,24 @@ def custom_static(filename):
 # Main server
 @app.route("/")
 def get_image():
+  global next_image
   log = request.args.get('log')
   if log:
-    print "LOG:", log
+    print("LOG:", log)
     logfile.write(str(datetime.datetime.now()) + " ")
     logfile.write(os.path.basename(log))
     logfile.write("\n");
     next_image += 1
 
   image_index = request.args.get('image_index')
+  
   if image_index:
     current_image = images[int(image_index)]
   else:
-    global next_image
     current_image = images[next_image]
 
   # Render a new image:
   return render_template('index.html', image=current_image, image_index=image_index)
 
 if __name__ == "__main__":
-  app.run(debug=True, host="0.0.0.0")
+   app.run(host="192.168.1.7",port=5010)
